@@ -1,16 +1,20 @@
 package com.martin.opencv4android;
 
 import android.app.FragmentManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -26,8 +30,10 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private PolygonView polygonView;
     private String img_Decodable_Str;
     private Button scan;
+    private FrameLayout sourceFrame;
+    private Uri imageUri;
     private Bitmap bitmap;
 
     @Override
@@ -47,195 +55,49 @@ public class MainActivity extends AppCompatActivity {
         iv_show_img = (ImageView) findViewById(R.id.iv_show_img);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new ScanButtonClickListener());
-        // scan = (Button) findViewById(R.id.button1);
+        polygonView = (PolygonView) findViewById(R.id.polygonView);
+        Uri uri = getIntent().getParcelableExtra("imageUri");
 
-        Bundle bundle = getIntent().getExtras();
-
-        if(bundle.getInt("PASSING")== 1)
-        {
-            openCamera();
-        }
-        else if(bundle.getInt("PASSING")==2) {
-            openMediaContent();
+        try {
+            bitmap = Utils.getBitmap(MainActivity.this, uri);
+            getContentResolver().delete(uri, null, null);
+            sourceFrame = (FrameLayout) findViewById(R.id.sourceFrame);
+            sourceFrame.post(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("SOurcevrame", sourceFrame.getWidth() + " " + sourceFrame.getHeight());
+                    Bitmap scaledBitmap = scaledBitmap(bitmap, sourceFrame.getWidth(), sourceFrame.getHeight());
+                    iv_show_img.setImageBitmap(scaledBitmap);
+                    Bitmap tempBitmap = ((BitmapDrawable) iv_show_img.getDrawable()).getBitmap();
+                    Map<Integer, PointF> pointFs = getEdgePoints(tempBitmap);
+                    polygonView.setPoints(pointFs);
+                    polygonView.setVisibility(View.VISIBLE);
+                    int padding = (int) getResources().getDimension(R.dimen.scanPadding);
+                    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(tempBitmap.getWidth() + 2 * padding, tempBitmap.getHeight() + 2 * padding);
+                    layoutParams.gravity = Gravity.CENTER;
+                    polygonView.setLayoutParams(layoutParams);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         // scan.setOnClickListener(new ScanButtonClickListener());
     }
-
-    private class CameraButtonClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            openCamera();
-        }
-    }
-
-    private class GalleryClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            openMediaContent();
-        }
-    }
-
-    public void openMediaContent() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        // Start the Intent
-        startActivityForResult(galleryIntent, ScanConstants.PICKFILE_REQUEST_CODE);
-    }
-
-    public void openCamera() {
-        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        // File file = createImageFile();
-        // file.getParentFile().mkdirs();
-        // fileUri = Uri.fromFile(file);
-        // if (file != null) {
-        // cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-        startActivityForResult(cameraIntent, ScanConstants.START_CAMERA_REQUEST_CODE);
-        // }
-    }
-
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        // TODO Auto-generated method stub
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        Bitmap bp = (Bitmap) data.getExtras().get("data");
-//    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
 
-//    private File createImageFile() {
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new
-//                Date());
-//        File file = new File(ScanConstants.IMAGE_PATH, "IMG_" + timeStamp +
-//                ".jpg");
-//        return file;
-//    }
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // TODO Auto-generated method stub
-        try {
-            // When an Image is picked
-            if (requestCode == ScanConstants.PICKFILE_REQUEST_CODE && resultCode == RESULT_OK
-                    && null != data) {
-                // Get the Image from data
-
-                Uri selectedImage = data.getData();
-                String[] filePathColumn = { MediaStore.Images.Media.DATA };
-
-                // Get the cursor
-                Cursor cursor = getContentResolver().query(selectedImage,
-                        filePathColumn, null, null, null);
-                // Move to first row
-                cursor.moveToFirst();
-
-                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                img_Decodable_Str = cursor.getString(columnIndex);
-                cursor.close();
-                bitmap = Bitmap.createBitmap(BitmapFactory.decodeFile(img_Decodable_Str));
-                Log.d("OCV", "here");
-                // bitmap = getResizedBitmap(bitmap, 1080, 1920);
-                // ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                // bitmap.compress(Bitmap.CompressFormat.PNG, 50, stream);
-                // byte[] byteArray = stream.toByteArray();
-                // Intent intent = new Intent(this, MainActivity.class);
-                // intent.putExtra("picture", byteArray);
-                // createImageFromBitmap(bitmap);
-                // startActivity(intent);
-                iv_show_img.setImageBitmap(bitmap);
-                polygonView = (PolygonView) findViewById(R.id.polygonView);
-                Map<Integer, PointF> pointFs = getEdgePoints(bitmap);
-                float scalex = iv_show_img.getWidth()/bitmap.getWidth();
-                float scaley = iv_show_img.getHeight()/bitmap.getHeight();
-                polygonView.setPoints(pointFs);
-                polygonView.setVisibility(View.VISIBLE);
-                int padding = (int) getResources().getDimension(R.dimen.scanPadding);
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(bitmap.getWidth(), bitmap.getHeight());
-                layoutParams.gravity = Gravity.CENTER;
-                polygonView.setLayoutParams(layoutParams);
-            }
-
-            else if (requestCode == ScanConstants.START_CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-                bitmap = Bitmap.createBitmap((Bitmap) data.getExtras().get("data"));
-                // bitmap = getResizedBitmap(bitmap, 720, 1280);
-                iv_show_img.setImageBitmap(bitmap);
-                polygonView = (PolygonView) findViewById(R.id.polygonView);
-                Map<Integer, PointF> pointFs = getEdgePoints(bitmap);
-                float scalex = iv_show_img.getWidth()/bitmap.getWidth();
-                float scaley = iv_show_img.getHeight()/bitmap.getHeight();
-                polygonView.setPoints(pointFs);
-                polygonView.setVisibility(View.VISIBLE);
-                int padding = (int) getResources().getDimension(R.dimen.scanPadding);
-                // FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(bitmap.getWidth() + 2 * padding, bitmap.getHeight() + 2 * padding);
-                // layoutParams.gravity = Gravity.CENTER;
-                // polygonView.setLayoutParams(layoutParams);
-            }
-            else {
-                Toast.makeText(this, "Hey pick your image first",
-                        Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, "Something went embrassing", Toast.LENGTH_LONG)
-                    .show();
-        }
-    }
-
-    public String createImageFromBitmap(Bitmap bitmap) {
-        String fileName = "myImage";//no .png or .jpg needed
-        try {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-            FileOutputStream fo = openFileOutput(fileName, Context.MODE_PRIVATE);
-            fo.write(bytes.toByteArray());
-            // remember close file output
-            fo.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            fileName = null;
-        }
-        return fileName;
-    }
-
-    public Bitmap scaleDownBitmap(Bitmap photo, int newHeight, Context context) {
-
-        final float densityMultiplier = context.getResources().getDisplayMetrics().density;
-
-        int h= (int) (newHeight*densityMultiplier);
-        int w= (int) (h * photo.getWidth()/((double) photo.getHeight()));
-
-        photo=Bitmap.createScaledBitmap(photo, w, h, true);
-
-        return photo;
-    }
-
-    public void onCLickToDetetFeatures(View view) {
-
-    }
-
-
-
-
-    @NonNull
-    private Bitmap getBlackBitmap(Bitmap bitmap) {
-
-        int w = bitmap.getWidth(), h = bitmap.getHeight();
-        int[] pix = new int[w * h];
-        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
-        int[] resultPixes = OpenCVHelper.gray(pix, w, h);
-        int cornerpts[];
-        cornerpts = OpenCVHelper.getBoxPoints(pix, w, h);
-        for(int i = 0; i<cornerpts.length; i++) {
-            Log.d("Scanned points", String.valueOf(cornerpts[i]));
-        }
-        Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
-        result.setPixels(resultPixes, 0, w, 0, 0, w, h);
-        return result;
+    private Bitmap scaledBitmap(Bitmap bitmap, int width, int height) {
+        Matrix m = new Matrix();
+        m.setRectToRect(new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight()), new RectF(0, 0, width, height), Matrix.ScaleToFit.CENTER);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
     }
 
     private Map<Integer, PointF> getEdgePoints(Bitmap tempBitmap) {
@@ -305,20 +167,20 @@ public class MainActivity extends AppCompatActivity {
         int height = original.getHeight();
         float xRatio = (float) original.getWidth() / iv_show_img.getWidth();
         float yRatio = (float) original.getHeight() / iv_show_img.getHeight();
-        // float xRatio = 1;
-        // float yRatio = 1;
+//         float xRatio = 1;
+//         float yRatio = 1;
 
         int[] newpoints = {0,0,0,0,0,0,0,0};
         newpoints[0] = (int)((points.get(0).x) * xRatio);
-        newpoints[1] = (int)((points.get(0).y) * xRatio);
+        newpoints[1] = (int)((points.get(0).y) * yRatio);
         newpoints[2] = (int)((points.get(1).x) * xRatio);
-        newpoints[3] = (int)((points.get(1).y) * xRatio);
-        newpoints[4] = (int)((points.get(2).x) * yRatio);
+        newpoints[3] = (int)((points.get(1).y) * yRatio);
+        newpoints[4] = (int)((points.get(2).x) * xRatio);
         newpoints[5] = (int)((points.get(2).y) * yRatio);
-        newpoints[6] = (int)((points.get(3).x) * yRatio);
+        newpoints[6] = (int)((points.get(3).x) * xRatio);
         newpoints[7] = (int)((points.get(3).y) * yRatio);
-        Log.d("OpenCV", String.valueOf(points.get(0).x));
-        Log.d("OpenCV", String.valueOf(points.get(0).y));
+        Log.d("OpenCV", String.valueOf(newpoints[0]));
+        Log.d("OpenCV", String.valueOf(newpoints[1]));
         Log.d("OpenCV", String.valueOf(points.get(1).x));
         Log.d("OpenCV", String.valueOf(points.get(1).y));
         Log.d("OpenCV", String.valueOf(points.get(2).x));
@@ -332,36 +194,9 @@ public class MainActivity extends AppCompatActivity {
         int[] resultPixes = OpenCVHelper.perspective(pix, newpoints, width, height);
         Log.d("OpenCV4Android", "Checkpint");
         Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-        result.setPixels(pix, 0, width, 0, 0, width, height);
+        result.setPixels(resultPixes, 0, width, 0, 0, width, height);
         polygonView.setVisibility(View.GONE);
         return result;
-    }
-
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;
-    }
-
-    protected void showProgressDialog(String message) {
-//        progressDialogFragment = new ProgressDialogFragment(message);
-//        FragmentManager fm = getFragmentManager();
-//        progressDialogFragment.show(fm, ProgressDialogFragment.class.toString());
-    }
-
-    protected void dismissDialog() {
-        // progressDialogFragment.dismissAllowingStateLoss();
     }
 
     private boolean isScanPointsValid(Map<Integer, PointF> points) {

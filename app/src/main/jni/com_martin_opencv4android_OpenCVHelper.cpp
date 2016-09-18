@@ -288,6 +288,8 @@ JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_perspect
         }
     for(int p = 0; p < 8; p++) {
         newpoints[p] = point[p];
+        __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d", newpoints[p]);
+
     }
     vector<Point2f> points;
     for(int p = 0; p < 8; p+=2) {

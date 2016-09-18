@@ -5,7 +5,7 @@
             android:id="@+id/trash"
             android:title="My Docs"
             android:checked="true"
-            android:icon="@drawable/ic_action_name"/>
+            android:icon="@drawable/ic_docs"/>
         <item
             android:id="@+id/home"
             android:title="Capture from Camera"
