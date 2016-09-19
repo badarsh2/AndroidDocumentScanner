@@ -15,26 +15,23 @@ import java.util.ArrayList;
 /**
  * Created by Adarsh on 9/16/16.
  */
-public class DocsAdapter extends RecyclerView.Adapter<DocsAdapter.ViewHolder> {
+public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder> {
 
     Context mContext;
-    ArrayList<DocItem> mItems;
+    ArrayList<DetailItem> mItems;
 
 
 
-    public DocsAdapter(Context context, ArrayList<DocItem> items) {
+    public DetailAdapter(Context context, ArrayList<DetailItem> items) {
         mContext = context;
         mItems = items;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView name,tstext;
         ImageView contactPic;
         public ViewHolder(View itemView) {
             super(itemView);
-            name = (TextView)itemView.findViewById(R.id.docname);
-            tstext = (TextView)itemView.findViewById(R.id.doctimestamp);
             contactPic = (ImageView)itemView.findViewById(R.id.iv1);
         }
     }
@@ -46,7 +43,7 @@ public class DocsAdapter extends RecyclerView.Adapter<DocsAdapter.ViewHolder> {
 
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout;
-        layout = R.layout.item_gallery;
+        layout = R.layout.item_detail;
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(layout, parent, false);
         return new ViewHolder(view);
@@ -54,18 +51,7 @@ public class DocsAdapter extends RecyclerView.Adapter<DocsAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        holder.name.setText(mItems.get(position).getName());
-        holder.tstext.setText(mItems.get(position).getTimestamp());
         holder.contactPic.setImageBitmap(mItems.get(position).getBitmap());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(mContext, DetailActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.putExtra("folder", mItems.get(position).getName());
-                mContext.startActivity(i);
-            }
-        });
     }
 
 

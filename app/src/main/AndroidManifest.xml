@@ -29,11 +29,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ChooseActivity"
-            android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme">
-        </activity>
-        <activity
             android:name=".DetailActivity"
             android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme"></activity>

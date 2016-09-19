@@ -8,10 +8,13 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -47,14 +50,40 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout sourceFrame;
     private Uri imageUri;
     private Bitmap bitmap;
+    private int status = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         iv_show_img = (ImageView) findViewById(R.id.iv_show_img);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new ScanButtonClickListener());
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new ScanButtonClickListener());
+        ImageView submit = (ImageView) findViewById(R.id.submit);
+        submit.setOnClickListener(new ScanButtonClickListener());
+        ImageView cancel = (ImageView) findViewById(R.id.cancel);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+        ImageView rotateleft = (ImageView) findViewById(R.id.rotateleft);
+        rotateleft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Drawable d = iv_show_img.getDrawable();
+                iv_show_img.setImageDrawable(getRotateDrawable(d, (float)-90.0));
+            }
+        });
+        ImageView rotateright = (ImageView) findViewById(R.id.rotateright);
+        rotateright.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Drawable d = iv_show_img.getDrawable();
+                iv_show_img.setImageDrawable(getRotateDrawable(d, (float)90.0));
+            }
+        });
         polygonView = (PolygonView) findViewById(R.id.polygonView);
         Uri uri = getIntent().getParcelableExtra("imageUri");
 
@@ -65,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             sourceFrame.post(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("SOurcevrame", sourceFrame.getWidth() + " " + sourceFrame.getHeight());
+                    // Log.d("SOurcevrame", sourceFrame.getWidth() + " " + sourceFrame.getHeight());
                     Bitmap scaledBitmap = scaledBitmap(bitmap, sourceFrame.getWidth(), sourceFrame.getHeight());
                     iv_show_img.setImageBitmap(scaledBitmap);
                     Bitmap tempBitmap = ((BitmapDrawable) iv_show_img.getDrawable()).getBitmap();
@@ -84,6 +113,19 @@ public class MainActivity extends AppCompatActivity {
         // scan.setOnClickListener(new ScanButtonClickListener());
     }
 
+    private Drawable getRotateDrawable(final Drawable d, final float angle) {
+        final Drawable[] arD = { d };
+        return new LayerDrawable(arD) {
+            @Override
+            public void draw(final Canvas canvas) {
+                canvas.save();
+                canvas.rotate(angle, d.getBounds().width() / 2, d.getBounds().height() / 2);
+                super.draw(canvas);
+                canvas.restore();
+            }
+        };
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -91,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        finish();
         super.onBackPressed();
     }
 
@@ -149,15 +192,21 @@ public class MainActivity extends AppCompatActivity {
     private class ScanButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            Map<Integer, PointF> points = polygonView.getPoints();
-            Log.d("OpenCV4Android", String.valueOf(points.size()));
-            Bitmap op = getScannedBitmap(bitmap, points);
-            iv_show_img.setImageBitmap(op);
-            if (isScanPointsValid(points)) {
+            if(status == 0) {
+                Map<Integer, PointF> points = polygonView.getPoints();
+                Log.d("OpenCV4Android", String.valueOf(points.size()));
+                Bitmap op = getScannedBitmap(bitmap, points);
+                iv_show_img.setImageBitmap(op);
+                if (isScanPointsValid(points)) {
 //                Bitmap op = getScannedBitmap(bitmap, points);
 //                iv_show_img.setImageBitmap(op);
-            } else {
-                // showErrorDialog();
+                } else {
+                    // showErrorDialog();
+                }
+                status = 1;
+            }
+            else if(status == 1) {
+
             }
         }
     }

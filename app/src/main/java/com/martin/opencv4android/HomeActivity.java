@@ -50,16 +50,16 @@ public class HomeActivity extends AppCompatActivity {
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new GalleryClickListener());
+        fab.setOnClickListener(new CameraButtonClickListener());
 
         rvDocs = (RecyclerView) findViewById(R.id.rvDocs);
         ArrayList<DocItem> iPostParams = new ArrayList<DocItem>();
         DocItem postemail = new DocItem("New Doc 1", "12/09/16", null);
         iPostParams.add(postemail);
-        postemail = new DocItem("New Doc 2", "13/09/16", null);
-        iPostParams.add(postemail);
-        postemail = new DocItem("New Doc 3", "08/09/16", null);
-        iPostParams.add(postemail);
+//        postemail = new DocItem("New Doc 2", "13/09/16", null);
+//        iPostParams.add(postemail);
+//        postemail = new DocItem("New Doc 3", "08/09/16", null);
+//        iPostParams.add(postemail);
 
         DocsAdapter adapter = new DocsAdapter(getApplicationContext(), iPostParams);
         rvDocs.setAdapter(adapter);
@@ -171,19 +171,11 @@ public class HomeActivity extends AppCompatActivity {
 
                 switch (id){
                     case R.id.home:
-                        // Toast.makeText(getApplicationContext(),"Home",Toast.LENGTH_SHORT).show();
-//                        Intent i = new Intent(HomeActivity.this, MainActivity.class);
-//                        i.putExtra("PASSING", 1);
-//                        startActivity(i);
-                        openMediaContent();
+                        openCamera();
                         drawerLayout.closeDrawers();
                         break;
                     case R.id.settings:
-                        // Toast.makeText(getApplicationContext(),"Settings",Toast.LENGTH_SHORT).show();
-//                        i = new Intent(HomeActivity.this, MainActivity.class);
-//                        i.putExtra("PASSING", 2);
-//                        startActivity(i);
-                        openCamera();
+                        openMediaContent();
                         drawerLayout.closeDrawers();
                         break;
                     case R.id.trash:
