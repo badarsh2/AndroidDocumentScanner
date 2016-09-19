@@ -1,8 +1,11 @@
 package com.martin.opencv4android;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
@@ -26,8 +29,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -37,6 +42,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +55,9 @@ public class MainActivity extends AppCompatActivity {
     private Button scan;
     private FrameLayout sourceFrame;
     private Uri imageUri;
-    private Bitmap bitmap;
+    private Bitmap bitmap, op;
     private int status = 0;
+    private FileOutputStream fos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,13 +196,75 @@ public class MainActivity extends AppCompatActivity {
         return outlinePoints;
     }
 
+    private void popup_request(final Bitmap b) {
+        LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+
+        View promptView = layoutInflater.inflate(R.layout.popup_layout, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+
+        // set prompts.xml to be the layout file of the alertdialog builder
+        alertDialogBuilder.setView(promptView);
+
+        final EditText input = (EditText) promptView.findViewById(R.id.userInput);
+
+        // setup a dialog window
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        saveToInternalStorage(b, input.getText().toString());
+                        Toast.makeText(getApplicationContext(), "Image saved to " + input.getText().toString(), Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                });
+//                .setNegativeButton("Cancel",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int id) {
+//                                dialog.cancel();
+//                            }
+//                        });
+
+        // create an alert dialog
+        AlertDialog alertD = alertDialogBuilder.create();
+
+        alertD.show();
+    }
+
+    private String saveToInternalStorage(Bitmap bitmapImage, String str){
+        // ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        // File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File directory = new File(android.os.Environment.getExternalStorageDirectory(),"/DocumentScanner/" + str);
+        int time = (int) (System.currentTimeMillis());
+        Timestamp tsTemp = new Timestamp(time);
+        String ts =  tsTemp.toString();
+        File mypath=new File(directory, ts + ".jpg");
+
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath();
+    }
+
     private class ScanButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             if(status == 0) {
                 Map<Integer, PointF> points = polygonView.getPoints();
                 Log.d("OpenCV4Android", String.valueOf(points.size()));
-                Bitmap op = getScannedBitmap(bitmap, points);
+                op = getScannedBitmap(bitmap, points);
                 iv_show_img.setImageBitmap(op);
                 if (isScanPointsValid(points)) {
 //                Bitmap op = getScannedBitmap(bitmap, points);
@@ -206,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
                 status = 1;
             }
             else if(status == 1) {
-
+                popup_request(op);
             }
         }
     }

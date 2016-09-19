@@ -37,6 +37,9 @@ public class HomeActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private RecyclerView rvDocs;
     private Uri fileUri;
+    ArrayList<DocItem> iPostParams;
+    private DocsAdapter adapter;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,17 +56,52 @@ public class HomeActivity extends AppCompatActivity {
         fab.setOnClickListener(new CameraButtonClickListener());
 
         rvDocs = (RecyclerView) findViewById(R.id.rvDocs);
-        ArrayList<DocItem> iPostParams = new ArrayList<DocItem>();
-        DocItem postemail = new DocItem("New Doc 1", "12/09/16", null);
-        iPostParams.add(postemail);
-//        postemail = new DocItem("New Doc 2", "13/09/16", null);
-//        iPostParams.add(postemail);
-//        postemail = new DocItem("New Doc 3", "08/09/16", null);
-//        iPostParams.add(postemail);
+        iPostParams = new ArrayList<DocItem>();
 
-        DocsAdapter adapter = new DocsAdapter(getApplicationContext(), iPostParams);
+        Filewalker fw = new Filewalker();
+        String dirpath=android.os.Environment.getExternalStorageDirectory().toString();
+        File reader = new File(dirpath, "DocumentScanner");
+        fw.walk(reader);
+
+        adapter = new DocsAdapter(getApplicationContext(), iPostParams);
         rvDocs.setAdapter(adapter);
         rvDocs.setLayoutManager(new GridLayoutManager(this, 2));
+    }
+
+    public class Filewalker {
+
+        public void walk(File root) {
+            iPostParams = new ArrayList<>();
+            DocItem postemail = new DocItem("Dummy Doc", "12/09/16", null);
+            iPostParams.add(postemail);
+
+            File[] list = root.listFiles();
+
+            for (File f : list) {
+                if (f.isDirectory()) {
+                    Log.d("", "Dir: " + f.getAbsoluteFile());
+                    postemail = null;
+                    postemail = new DocItem(f.getName().toString(), "19/09/16", null);
+                    iPostParams.add(postemail);
+                    // walk(f);
+                }
+                else {
+                    Log.d("", "File: " + f.getAbsoluteFile());
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        navigationView.setCheckedItem(0);
+        Filewalker fw = new Filewalker();
+        String dirpath=android.os.Environment.getExternalStorageDirectory().toString();
+        File reader = new File(dirpath, "DocumentScanner");
+        fw.walk(reader);
+
+        adapter.notifyDataSetChanged();
     }
 
     private class CameraButtonClickListener implements View.OnClickListener {
@@ -162,7 +200,7 @@ public class HomeActivity extends AppCompatActivity {
 
     public void initNavigationDrawer() {
 
-        NavigationView navigationView = (NavigationView)findViewById(R.id.navigation_view);
+        navigationView = (NavigationView)findViewById(R.id.navigation_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
