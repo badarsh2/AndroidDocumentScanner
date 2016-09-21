@@ -18,6 +18,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -28,6 +29,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +50,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
+
 public class MainActivity extends AppCompatActivity {
     private ImageView iv_show_img;
     private PolygonView polygonView;
@@ -55,9 +60,10 @@ public class MainActivity extends AppCompatActivity {
     private Button scan;
     private FrameLayout sourceFrame;
     private Uri imageUri;
-    private Bitmap bitmap, op;
+    private Bitmap bitmap, op, op2;
     private int status = 0;
     private FileOutputStream fos;
+    private float perswidth, persheight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,20 +85,20 @@ public class MainActivity extends AppCompatActivity {
         rotateleft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Drawable d = iv_show_img.getDrawable();
-                iv_show_img.setImageDrawable(getRotateDrawable(d, (float)-90.0));
+                    Bitmap rotatedBitmap = rotateImage(((BitmapDrawable)iv_show_img.getDrawable()).getBitmap(), -90);
+                    iv_show_img.setImageBitmap(rotatedBitmap);
             }
         });
         ImageView rotateright = (ImageView) findViewById(R.id.rotateright);
         rotateright.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Drawable d = iv_show_img.getDrawable();
-                iv_show_img.setImageDrawable(getRotateDrawable(d, (float)90.0));
+                Bitmap rotatedBitmap = rotateImage(((BitmapDrawable)iv_show_img.getDrawable()).getBitmap(), 90);
+                iv_show_img.setImageBitmap(rotatedBitmap);
             }
         });
         polygonView = (PolygonView) findViewById(R.id.polygonView);
-        Uri uri = getIntent().getParcelableExtra("imageUri");
+        final Uri uri = getIntent().getParcelableExtra("imageUri");
 
         try {
             bitmap = Utils.getBitmap(MainActivity.this, uri);
@@ -102,6 +108,30 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     // Log.d("SOurcevrame", sourceFrame.getWidth() + " " + sourceFrame.getHeight());
+                    ExifInterface ei = null;
+                    try {
+                        ei = new ExifInterface(uri.getPath());
+                        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                                ExifInterface.ORIENTATION_UNDEFINED);
+
+                        switch(orientation) {
+                            case ExifInterface.ORIENTATION_ROTATE_90:
+                                rotateImage(bitmap, 90);
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_180:
+                                rotateImage(bitmap, 180);
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_270:
+                                rotateImage(bitmap, 270);
+                                break;
+                            case ExifInterface.ORIENTATION_NORMAL:
+                            default:
+                                break;
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     Bitmap scaledBitmap = scaledBitmap(bitmap, sourceFrame.getWidth(), sourceFrame.getHeight());
                     iv_show_img.setImageBitmap(scaledBitmap);
                     Bitmap tempBitmap = ((BitmapDrawable) iv_show_img.getDrawable()).getBitmap();
@@ -171,6 +201,9 @@ public class MainActivity extends AppCompatActivity {
         float x4 = points[6];
         float y4 = points[7];
 
+        perswidth = max(abs(x2 - x1), abs(x3 - x1));
+        persheight = max(abs(y2 - y1), abs(y3 - y1));
+
         List<PointF> pointFs = new ArrayList<>();
         pointFs.add(new PointF(x1, y1));
         pointFs.add(new PointF(x2, y2));
@@ -217,7 +250,13 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Image saved to " + input.getText().toString(), Toast.LENGTH_LONG).show();
                         finish();
                     }
-                });
+                })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
 //                .setNegativeButton("Cancel",
 //                        new DialogInterface.OnClickListener() {
 //                            public void onClick(DialogInterface dialog, int id) {
@@ -236,7 +275,24 @@ public class MainActivity extends AppCompatActivity {
         // path to /data/data/yourapp/app_data/imageDir
         // File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         // Create imageDir
-        File directory = new File(android.os.Environment.getExternalStorageDirectory(),"/DocumentScanner/" + str);
+        File directory = new File(android.os.Environment.getExternalStorageDirectory(),"DocumentScanner/" + str);
+        if(!directory.exists()) {
+            directory.mkdirs();
+            File dirthumb = new File(android.os.Environment.getExternalStorageDirectory(),"DocumentScanner/thumbnails");
+            if(!dirthumb.exists()) {
+                dirthumb.mkdirs();
+            }
+            File mythumbpath=new File(dirthumb, str + ".jpg");
+
+            try {
+                FileOutputStream fosthumb = new FileOutputStream(mythumbpath);
+                // Use the compress method on the BitMap object to write image to the OutputStream
+                bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fosthumb);
+                fosthumb.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         int time = (int) (System.currentTimeMillis());
         Timestamp tsTemp = new Timestamp(time);
         String ts =  tsTemp.toString();
@@ -246,14 +302,9 @@ public class MainActivity extends AppCompatActivity {
             fos = new FileOutputStream(mypath);
             // Use the compress method on the BitMap object to write image to the OutputStream
             bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return directory.getAbsolutePath();
     }
@@ -265,7 +316,13 @@ public class MainActivity extends AppCompatActivity {
                 Map<Integer, PointF> points = polygonView.getPoints();
                 Log.d("OpenCV4Android", String.valueOf(points.size()));
                 op = getScannedBitmap(bitmap, points);
-                iv_show_img.setImageBitmap(op);
+                if (perswidth > persheight) {
+                    op2 = Bitmap.createScaledBitmap(op, 1000, 1600, false);
+                }
+                else {
+                    op2 = Bitmap.createScaledBitmap(op, 1600, 1000, false);
+                }
+                iv_show_img.setImageBitmap(op2);
                 if (isScanPointsValid(points)) {
 //                Bitmap op = getScannedBitmap(bitmap, points);
 //                iv_show_img.setImageBitmap(op);
@@ -275,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
                 status = 1;
             }
             else if(status == 1) {
-                popup_request(op);
+                popup_request(((BitmapDrawable)iv_show_img.getDrawable()).getBitmap());
             }
         }
     }
@@ -319,6 +376,13 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isScanPointsValid(Map<Integer, PointF> points) {
         return points.size() == 4;
+    }
+
+    public static Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix,
+                true);
     }
 
 }

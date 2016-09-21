@@ -1,11 +1,15 @@
 package com.martin.opencv4android;
 
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -109,7 +113,17 @@ public class DetailActivity extends AppCompatActivity {
             convertit(f, s);
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +"/DocumentScanner/" + s + "/example.pdf");
+            Intent target = new Intent(Intent.ACTION_VIEW);
+            target.setDataAndType(Uri.fromFile(file),"application/pdf");
+            target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
+            Intent intent = Intent.createChooser(target, "Open File");
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                // Instruct the user to install a PDF reader here, or something
+            }
 
             return null;
         }
@@ -143,9 +157,10 @@ public class DetailActivity extends AppCompatActivity {
                 try {
                     Bitmap b = BitmapFactory.decodeStream(new FileInputStream(listFile[i]));
                     if(b!= null) {
-                        DetailItem postemail = new DetailItem(b);
+                        DetailItem postemail = new DetailItem(b, listFile[i].getAbsolutePath());
                         iPostParams.add(postemail);
                         f.add(b);
+                        // Log.d("Path", listFile[i].getAbsolutePath());
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();

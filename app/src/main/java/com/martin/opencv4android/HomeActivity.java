@@ -26,6 +26,8 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -76,17 +78,24 @@ public class HomeActivity extends AppCompatActivity {
             iPostParams.add(postemail);
 
             File[] list = root.listFiles();
-
-            for (File f : list) {
-                if (f.isDirectory()) {
-                    Log.d("", "Dir: " + f.getAbsoluteFile());
-                    postemail = null;
-                    postemail = new DocItem(f.getName().toString(), "19/09/16", null);
-                    iPostParams.add(postemail);
-                    // walk(f);
-                }
-                else {
-                    Log.d("", "File: " + f.getAbsoluteFile());
+            if(list != null) {
+                for (File f : list) {
+                    if (f.isDirectory() && !(f.getName().equals("thumbnails"))) {
+                        Log.d("", "Dir: " + f.getAbsoluteFile());
+                        postemail = null;
+                        Bitmap b = null;
+                        File file= new File(android.os.Environment.getExternalStorageDirectory(),"/DocumentScanner/thumbnails/" + f.getName() + ".jpg");
+                        try {
+                            b = BitmapFactory.decodeStream(new FileInputStream(file));
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        postemail = new DocItem(f.getName().toString(), "19/09/16", b);
+                        iPostParams.add(postemail);
+                        // walk(f);
+                    } else {
+                        Log.d("", "File: " + f.getAbsoluteFile());
+                    }
                 }
             }
         }
@@ -101,7 +110,10 @@ public class HomeActivity extends AppCompatActivity {
         File reader = new File(dirpath, "DocumentScanner");
         fw.walk(reader);
 
-        adapter.notifyDataSetChanged();
+
+        adapter = new DocsAdapter(getApplicationContext(), iPostParams);
+        rvDocs.setAdapter(adapter);
+        rvDocs.setLayoutManager(new GridLayoutManager(this, 2));
     }
 
     private class CameraButtonClickListener implements View.OnClickListener {
