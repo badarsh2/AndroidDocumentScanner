@@ -14,8 +14,7 @@
             android:id="@+id/sourceFrame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:padding="10dp">
+            android:layout_gravity="center">
 
             <ImageView
                 android:id="@+id/iv_show_img"
@@ -29,7 +28,6 @@
             android:id="@+id/polygonView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="10dp"
             android:layout_gravity="center"
             android:visibility="gone"></com.martin.opencv4android.PolygonView>
     </FrameLayout>

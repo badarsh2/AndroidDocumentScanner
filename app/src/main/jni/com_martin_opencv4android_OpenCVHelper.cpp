@@ -114,7 +114,7 @@ vector<Point2f> getPoints(Mat image)
 	// rect = Rect(50, 50, width-100, height-100);
 	rect = Rect(x_rect,y_rect,wid_rect ,hig_rect );
 	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d", image.channels());
-	grabCut(image, mask, rect, bgdModel, fgdModel, 5, GC_INIT_WITH_RECT);
+	grabCut(image, mask, rect, bgdModel, fgdModel, 20, GC_INIT_WITH_RECT);
 	for(int i = 0; i < image.rows; i++)
 	{
 		for(int j = 0; j < image.cols; j++)
@@ -301,8 +301,9 @@ JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_perspect
 	Point p1, p2;
 	w = abc.size().width;
 	h = abc.size().height;
-	if(w>h){p1 = Point(0,h); p2 = Point(w,0);}
-	else{p1 = Point(w,0); p2 = Point(0,h);}
+	p1 = Point(w,0); p2 = Point(0,h);
+	// if(w>h){p1 = Point(0,h); p2 = Point(w,0);}
+	// else{p1 = Point(w,0); p2 = Point(0,h);}
 	vector<Point2f> dst = pushPoints(Point(0,0), p1, p2, Point(w,h));
 	//cout << dst << endl;
 	Mat transmtx = getPerspectiveTransform(points, dst);

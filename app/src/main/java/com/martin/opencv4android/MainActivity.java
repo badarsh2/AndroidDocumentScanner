@@ -109,28 +109,25 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     // Log.d("SOurcevrame", sourceFrame.getWidth() + " " + sourceFrame.getHeight());
                     ExifInterface ei = null;
-                    try {
-                        ei = new ExifInterface(uri.getPath());
-                        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                                ExifInterface.ORIENTATION_UNDEFINED);
-
-                        switch(orientation) {
-                            case ExifInterface.ORIENTATION_ROTATE_90:
-                                rotateImage(bitmap, 90);
-                                break;
-                            case ExifInterface.ORIENTATION_ROTATE_180:
-                                rotateImage(bitmap, 180);
-                                break;
-                            case ExifInterface.ORIENTATION_ROTATE_270:
-                                rotateImage(bitmap, 270);
-                                break;
-                            case ExifInterface.ORIENTATION_NORMAL:
-                            default:
-                                break;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    //                        ei = new ExifInterface(uri.getPath());
+//                        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+//                                ExifInterface.ORIENTATION_UNDEFINED);
+//                        Log.d("MainActivity", "the orientation is " + orientation);
+//
+//                        switch(orientation) {
+//                            case ExifInterface.ORIENTATION_ROTATE_90:
+//                                rotateImage(bitmap, 90);
+//                                break;
+//                            case ExifInterface.ORIENTATION_ROTATE_180:
+//                                rotateImage(bitmap, 180);
+//                                break;
+//                            case ExifInterface.ORIENTATION_ROTATE_270:
+//                                rotateImage(bitmap, 270);
+//                                break;
+//                            case ExifInterface.ORIENTATION_NORMAL:
+//                            default:
+//                                break;
+//                        }
 
                     Bitmap scaledBitmap = scaledBitmap(bitmap, sourceFrame.getWidth(), sourceFrame.getHeight());
                     iv_show_img.setImageBitmap(scaledBitmap);
@@ -148,19 +145,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         // scan.setOnClickListener(new ScanButtonClickListener());
-    }
-
-    private Drawable getRotateDrawable(final Drawable d, final float angle) {
-        final Drawable[] arD = { d };
-        return new LayerDrawable(arD) {
-            @Override
-            public void draw(final Canvas canvas) {
-                canvas.save();
-                canvas.rotate(angle, d.getBounds().width() / 2, d.getBounds().height() / 2);
-                super.draw(canvas);
-                canvas.restore();
-            }
-        };
     }
 
     @Override
@@ -200,9 +184,6 @@ public class MainActivity extends AppCompatActivity {
         float y3 = points[5];
         float x4 = points[6];
         float y4 = points[7];
-
-        perswidth = max(abs(x2 - x1), abs(x3 - x1));
-        persheight = max(abs(y2 - y1), abs(y3 - y1));
 
         List<PointF> pointFs = new ArrayList<>();
         pointFs.add(new PointF(x1, y1));
@@ -316,11 +297,13 @@ public class MainActivity extends AppCompatActivity {
                 Map<Integer, PointF> points = polygonView.getPoints();
                 Log.d("OpenCV4Android", String.valueOf(points.size()));
                 op = getScannedBitmap(bitmap, points);
+                // perswidth = points[0]
+                Log.d("MainActivity", "Sizes are" + bitmap.getWidth() + " " + bitmap.getHeight());
                 if (perswidth > persheight) {
-                    op2 = Bitmap.createScaledBitmap(op, 1000, 1600, false);
+                    op2 = Bitmap.createScaledBitmap(op, 1600, 1000, false);
                 }
                 else {
-                    op2 = Bitmap.createScaledBitmap(op, 1600, 1000, false);
+                    op2 = Bitmap.createScaledBitmap(op, 1000, 1600, false);
                 }
                 iv_show_img.setImageBitmap(op2);
                 if (isScanPointsValid(points)) {
@@ -362,6 +345,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("OpenCV", String.valueOf(points.get(2).y));
         Log.d("OpenCV", String.valueOf(points.get(3).x));
         Log.d("OpenCV", String.valueOf(points.get(3).y));
+        perswidth = max(abs(newpoints[2] - newpoints[0]), abs(newpoints[4] - newpoints[0]));
+        persheight = max(abs(newpoints[3] - newpoints[1]), abs(newpoints[5] - newpoints[1]));
         // Log.d("", "POints(" + x1 + "," + y1 + ")(" + x2 + "," + y2 + ")(" + x3 + "," + y3 + ")(" + x4 + "," + y4 + ")");
         int[] pix = new int[width * height];
         original.getPixels(pix, 0, width, 0, 0, width, height);
