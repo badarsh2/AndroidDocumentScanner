@@ -15,8 +15,8 @@
 using namespace cv;
 using namespace std;
 
-int RESIZE_WIDTH=250;
-int RESIZE_HEIGHT=500;
+int RESIZE_WIDTH=500;
+int RESIZE_HEIGHT=800;
 
 Mat resize_(Mat &inputImage)
 {
@@ -84,6 +84,7 @@ vector<Point2f> getPoints(Mat image)
 {
 	int width = image.size().width;
 	int height = image.size().height;
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d %d", width, height);
 	int intensity, img_intensity, larea = 0, lindex = 0;
 	Mat bgdModel, fgdModel, mask;
 	vector<vector<Point> > contours;
@@ -97,6 +98,8 @@ vector<Point2f> getPoints(Mat image)
     int hig_rect,wid_rect;
     if(width > height)
     {
+        x_rect=(int)((float)RESIZE_HEIGHT/7.0);
+        y_rect= (int)((float)RESIZE_WIDTH/7.0);
         wid_rect=width-(int)(2*((float)RESIZE_HEIGHT/7.0));
         hig_rect=height-(int)(2*((float)RESIZE_WIDTH/7.0));
     }
@@ -114,7 +117,7 @@ vector<Point2f> getPoints(Mat image)
 	// rect = Rect(50, 50, width-100, height-100);
 	rect = Rect(x_rect,y_rect,wid_rect ,hig_rect );
 	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d", image.channels());
-	grabCut(image, mask, rect, bgdModel, fgdModel, 20, GC_INIT_WITH_RECT);
+	grabCut(image, mask, rect, bgdModel, fgdModel, 5, GC_INIT_WITH_RECT);
 	for(int i = 0; i < image.rows; i++)
 	{
 		for(int j = 0; j < image.cols; j++)
@@ -233,12 +236,13 @@ JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_getBoxPo
              resizedWidth=RESIZE_WIDTH;
              resizedHgt = RESIZE_HEIGHT;
     }
+    /*
     for(int p = 0; p < w; p++) {
         for(int q = 0; q < h; q++){
             // __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d", imgData.at<uchar>(p,q));
         }
-    }
-    // imgData = resize_(imgData);
+    }*/
+    imgData = resize_(imgData);
     __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Checkpt 3");
     cvtColor(imgData , imgData , CV_RGBA2RGB);
     vector<Point2f> points = getPoints(imgData);
@@ -254,7 +258,7 @@ JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_getBoxPo
     	    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " point  before y: %d", point[countr]);
     	    countr++;
     	}
-    for(int i=0;i<countr;i++)
+    for(int i=0;i<8;i++)
         	{
         	    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " point %d", point[i]);
 

@@ -3,7 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="scanPadding">16dp</dimen>
+    <dimen name="scanPadding">8dp</dimen>
     <dimen name="polygonViewCircleWidth">20dp</dimen>
     <dimen name="polygonViewStrokeWidth">2dp</dimen>
     <dimen name="fab_margin">16dp</dimen>

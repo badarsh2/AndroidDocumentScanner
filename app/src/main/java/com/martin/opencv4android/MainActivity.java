@@ -128,8 +128,17 @@ public class MainActivity extends AppCompatActivity {
 //                            default:
 //                                break;
 //                        }
-
+//                    Bitmap bitmap2;
+//                    if(bitmap.getWidth()> bitmap.getHeight()) {
+//                        bitmap2 = Bitmap.createScaledBitmap(bitmap, 800, 500, false);
+//                        bitmap = bitmap2;
+//                    }
+//                    else {
+//                        bitmap2 = Bitmap.createScaledBitmap(bitmap, 500, 800, false);
+//                        bitmap = bitmap2;
+//                    }
                     Bitmap scaledBitmap = scaledBitmap(bitmap, sourceFrame.getWidth(), sourceFrame.getHeight());
+                    // saveToInternalStorage(bitmap, "Test");
                     iv_show_img.setImageBitmap(scaledBitmap);
                     Bitmap tempBitmap = ((BitmapDrawable) iv_show_img.getDrawable()).getBitmap();
                     Map<Integer, PointF> pointFs = getEdgePoints(tempBitmap);

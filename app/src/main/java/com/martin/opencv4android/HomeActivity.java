@@ -74,8 +74,8 @@ public class HomeActivity extends AppCompatActivity {
 
         public void walk(File root) {
             iPostParams = new ArrayList<>();
-            DocItem postemail = new DocItem("Dummy Doc", "12/09/16", null);
-            iPostParams.add(postemail);
+            DocItem postemail;
+            // iPostParams.add(postemail);
 
             File[] list = root.listFiles();
             if(list != null) {
