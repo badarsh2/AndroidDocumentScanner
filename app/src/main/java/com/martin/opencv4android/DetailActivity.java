@@ -5,13 +5,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,19 +19,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
-import com.itextpdf.text.BadElementException;
+
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.martin.opencv4android.Adapter.DetailAdapter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 public class DetailActivity extends AppCompatActivity {
@@ -43,6 +48,7 @@ public class DetailActivity extends AppCompatActivity {
     ArrayList<Bitmap> f;
     File[] listFile;
     String s;
+    File file;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +60,14 @@ public class DetailActivity extends AppCompatActivity {
         s = getIntent().getStringExtra("folder");
         getSupportActionBar().setTitle(s);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                  onBackPressed();
+                //Toast.makeText(DetailActivity.this,"hello",Toast.LENGTH_SHORT).show();
+            }
+        });
 
         f = new ArrayList<>();
 
@@ -67,7 +81,8 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
         rvPics = (RecyclerView) findViewById(R.id.rvPics);
-        getFromSdcard(s);
+        //getFromSdcard(s);
+        new LoadPhotos(s).execute();
     }
 
     @Override
@@ -84,16 +99,22 @@ public class DetailActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
-        if(id == android.R.id.home) {
-            finish();
+        if(id == R.id.action_Select) {
+
+            deleteRecursive(file);
+
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
     }
 
     private class PDFAsyncTask extends AsyncTask<Void, Void, Void>
@@ -113,7 +134,7 @@ public class DetailActivity extends AppCompatActivity {
             convertit(f, s);
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +"/DocumentScanner/" + s + "/example.pdf");
+            file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +"/DocumentScanner/" + s + "/example.pdf");
             Intent target = new Intent(Intent.ACTION_VIEW);
             target.setDataAndType(Uri.fromFile(file),"application/pdf");
             target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -142,7 +163,7 @@ public class DetailActivity extends AppCompatActivity {
 
     public void getFromSdcard(String s)
     {
-        File file= new File(android.os.Environment.getExternalStorageDirectory(),"/DocumentScanner/" + s);
+        file= new File(android.os.Environment.getExternalStorageDirectory(),"/DocumentScanner/" + s);
         ArrayList<DetailItem> iPostParams = new ArrayList<DetailItem>();
         Log.d("DetailActivity", "Checkpt 1");
 
@@ -172,6 +193,7 @@ public class DetailActivity extends AppCompatActivity {
             DetailAdapter adapter = new DetailAdapter(getApplicationContext(),iPostParams);
             rvPics.setAdapter(adapter);
             rvPics.setLayoutManager(new GridLayoutManager(this, 2));
+
         }
     }
 
@@ -210,6 +232,72 @@ public class DetailActivity extends AppCompatActivity {
         catch (Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+// -- Async class for loading Photos--//
+
+    public class LoadPhotos extends AsyncTask<String, Void, String> {
+        private ProgressDialog dialog;
+        private DetailItem postemail;
+        ArrayList<DetailItem> iPostParams = new ArrayList<DetailItem>();
+        String s;
+        public LoadPhotos(String s) {
+            this.s = s;
+        }
+
+
+        protected void onPreExecute() {
+            dialog = ProgressDialog.show(DetailActivity.this, "Loading",
+                    "Loading...", true);
+            dialog.show();
+
+        }
+
+        @Override
+        protected String doInBackground(String... arg0) {
+
+            file= new File(android.os.Environment.getExternalStorageDirectory(),"/DocumentScanner/" + s);
+
+            Log.d("DetailActivity", "Checkpt 1");
+
+            if (file.isDirectory())
+            {
+                Log.d("DetailActivity", "Checkpt 2");
+                listFile = file.listFiles();
+
+
+                for (int i = 0; i < listFile.length; i++)
+                {
+                    try {
+                        Bitmap b = BitmapFactory.decodeStream(new FileInputStream(listFile[i]));
+                        if(b!= null) {
+                            postemail = new DetailItem(b, listFile[i].getAbsolutePath());
+                            iPostParams.add(postemail);
+                            f.add(b);
+                            // Log.d("Path", listFile[i].getAbsolutePath());
+                        }
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+
+
+
+            }
+
+        return String.valueOf(f);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            DetailAdapter adapter = new DetailAdapter(getApplicationContext(),iPostParams);
+            rvPics.setAdapter(adapter);
+            rvPics.setLayoutManager(new GridLayoutManager(DetailActivity.this, 2));
+            dialog.dismiss();
         }
     }
 

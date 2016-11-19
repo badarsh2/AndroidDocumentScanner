@@ -28,6 +28,14 @@ public class ImageActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+                //Toast.makeText(DetailActivity.this,"hello",Toast.LENGTH_SHORT).show();
+            }
+        });
+
         imageView = (ImageView) findViewById(R.id.imageViewDisp);
         String path = getIntent().getStringExtra("pathkey");
         Log.d("Image", path);
@@ -59,7 +67,7 @@ public class ImageActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_Select) {
             return true;
         }
 

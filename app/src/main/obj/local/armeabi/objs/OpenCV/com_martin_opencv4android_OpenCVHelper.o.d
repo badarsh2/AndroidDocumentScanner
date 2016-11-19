@@ -1,6 +1,6 @@
-/home/adarsh/Documents/Github/Android/OpenCV4Android/app/src/main/obj/local/armeabi/objs/OpenCV/com_martin_opencv4android_OpenCVHelper.o: \
- /home/adarsh/Documents/Github/Android/OpenCV4Android/app/src/main/jni/com_martin_opencv4android_OpenCVHelper.cpp \
- /home/adarsh/Documents/Github/Android/OpenCV4Android/app/src/main/jni/com_martin_opencv4android_OpenCVHelper.h \
+/home/adarsh/Documents/Github/Android/docScanner/app/src/main/obj/local/armeabi/objs/OpenCV/com_martin_opencv4android_OpenCVHelper.o: \
+ /home/adarsh/Documents/Github/Android/docScanner/app/src/main/jni/com_martin_opencv4android_OpenCVHelper.cpp \
+ /home/adarsh/Documents/Github/Android/docScanner/app/src/main/jni/com_martin_opencv4android_OpenCVHelper.h \
  /home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/algorithm \
  /home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/vector \
  ../../../../native/jni/include/opencv2/highgui/highgui.hpp \
@@ -45,9 +45,31 @@
  ../../../../native/jni/include/opencv2/imgcodecs/imgcodecs_c.h \
  ../../../../native/jni/include/opencv2/videoio/videoio_c.h \
  ../../../../native/jni/include/opencv2/imgproc/imgproc.hpp \
- ../../../../native/jni/include/opencv2/imgproc.hpp
+ ../../../../native/jni/include/opencv2/imgproc.hpp \
+ ../../../../native/jni/include/opencv2/opencv.hpp \
+ ../../../../native/jni/include/opencv2/photo.hpp \
+ ../../../../native/jni/include/opencv2/photo/photo_c.h \
+ ../../../../native/jni/include/opencv2/video.hpp \
+ ../../../../native/jni/include/opencv2/video/tracking.hpp \
+ ../../../../native/jni/include/opencv2/video/background_segm.hpp \
+ ../../../../native/jni/include/opencv2/video/tracking_c.h \
+ ../../../../native/jni/include/opencv2/features2d.hpp \
+ ../../../../native/jni/include/opencv2/flann/miniflann.hpp \
+ ../../../../native/jni/include/opencv2/flann/defines.h \
+ ../../../../native/jni/include/opencv2/flann/config.h \
+ ../../../../native/jni/include/opencv2/objdetect.hpp \
+ ../../../../native/jni/include/opencv2/objdetect/detection_based_tracker.hpp \
+ ../../../../native/jni/include/opencv2/objdetect/objdetect_c.h \
+ /home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/deque \
+ ../../../../native/jni/include/opencv2/calib3d.hpp \
+ ../../../../native/jni/include/opencv2/core/affine.hpp \
+ ../../../../native/jni/include/opencv2/calib3d/calib3d_c.h \
+ ../../../../native/jni/include/opencv2/ml.hpp \
+ /home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/map \
+ /home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/iostream \
+ ../../../../native/jni/include/opencv2/core/core.hpp
 
-/home/adarsh/Documents/Github/Android/OpenCV4Android/app/src/main/jni/com_martin_opencv4android_OpenCVHelper.h:
+/home/adarsh/Documents/Github/Android/docScanner/app/src/main/jni/com_martin_opencv4android_OpenCVHelper.h:
 
 /home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/algorithm:
 
@@ -138,3 +160,47 @@
 ../../../../native/jni/include/opencv2/imgproc/imgproc.hpp:
 
 ../../../../native/jni/include/opencv2/imgproc.hpp:
+
+../../../../native/jni/include/opencv2/opencv.hpp:
+
+../../../../native/jni/include/opencv2/photo.hpp:
+
+../../../../native/jni/include/opencv2/photo/photo_c.h:
+
+../../../../native/jni/include/opencv2/video.hpp:
+
+../../../../native/jni/include/opencv2/video/tracking.hpp:
+
+../../../../native/jni/include/opencv2/video/background_segm.hpp:
+
+../../../../native/jni/include/opencv2/video/tracking_c.h:
+
+../../../../native/jni/include/opencv2/features2d.hpp:
+
+../../../../native/jni/include/opencv2/flann/miniflann.hpp:
+
+../../../../native/jni/include/opencv2/flann/defines.h:
+
+../../../../native/jni/include/opencv2/flann/config.h:
+
+../../../../native/jni/include/opencv2/objdetect.hpp:
+
+../../../../native/jni/include/opencv2/objdetect/detection_based_tracker.hpp:
+
+../../../../native/jni/include/opencv2/objdetect/objdetect_c.h:
+
+/home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/deque:
+
+../../../../native/jni/include/opencv2/calib3d.hpp:
+
+../../../../native/jni/include/opencv2/core/affine.hpp:
+
+../../../../native/jni/include/opencv2/calib3d/calib3d_c.h:
+
+../../../../native/jni/include/opencv2/ml.hpp:
+
+/home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/map:
+
+/home/adarsh/android-ndk-r12b/sources/cxx-stl/gnu-libstdc++/4.9/include/iostream:
+
+../../../../native/jni/include/opencv2/core/core.hpp:

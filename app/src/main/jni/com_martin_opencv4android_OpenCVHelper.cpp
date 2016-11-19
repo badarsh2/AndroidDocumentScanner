@@ -10,13 +10,20 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <android/log.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc_c.h>
+#include <android/bitmap.h>
 #define APPNAME "OCV4Android"
 
 using namespace cv;
 using namespace std;
 
-int RESIZE_WIDTH=500;
-int RESIZE_HEIGHT=800;
+int RESIZE_WIDTH=75;
+int RESIZE_HEIGHT=150;
+
+
+
 
 Mat resize_(Mat &inputImage)
 {
@@ -84,7 +91,6 @@ vector<Point2f> getPoints(Mat image)
 {
 	int width = image.size().width;
 	int height = image.size().height;
-	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d %d", width, height);
 	int intensity, img_intensity, larea = 0, lindex = 0;
 	Mat bgdModel, fgdModel, mask;
 	vector<vector<Point> > contours;
@@ -98,8 +104,6 @@ vector<Point2f> getPoints(Mat image)
     int hig_rect,wid_rect;
     if(width > height)
     {
-        x_rect=(int)((float)RESIZE_HEIGHT/7.0);
-        y_rect= (int)((float)RESIZE_WIDTH/7.0);
         wid_rect=width-(int)(2*((float)RESIZE_HEIGHT/7.0));
         hig_rect=height-(int)(2*((float)RESIZE_WIDTH/7.0));
     }
@@ -117,7 +121,7 @@ vector<Point2f> getPoints(Mat image)
 	// rect = Rect(50, 50, width-100, height-100);
 	rect = Rect(x_rect,y_rect,wid_rect ,hig_rect );
 	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d", image.channels());
-	grabCut(image, mask, rect, bgdModel, fgdModel, 5, GC_INIT_WITH_RECT);
+	grabCut(image, mask, rect, bgdModel, fgdModel, 20, GC_INIT_WITH_RECT);
 	for(int i = 0; i < image.rows; i++)
 	{
 		for(int j = 0; j < image.cols; j++)
@@ -185,7 +189,64 @@ Mat enhance(Mat image, double alpha = 1.0, double beta = 0)
 	return image;
 }
 
+jobject mat_to_bitmap(JNIEnv * env, Mat & src, bool needPremultiplyAlpha, jobject bitmap_config){
+    jclass java_bitmap_class = (jclass)env->FindClass("android/graphics/Bitmap");
+    jmethodID mid = env->GetStaticMethodID(java_bitmap_class,
+                                           "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
+
+    jobject bitmap = env->CallStaticObjectMethod(java_bitmap_class,
+                                                 mid, src.size().width, src.size().height, bitmap_config);
+    AndroidBitmapInfo  info;
+    void*              pixels = 0;
+
+    try {
+        CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
+        CV_Assert(src.type() == CV_8UC1 || src.type() == CV_8UC3 || src.type() == CV_8UC4);
+        CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
+        CV_Assert(pixels);
+        if(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888){
+            Mat tmp(info.height, info.width, CV_8UC4, pixels);
+            if(src.type() == CV_8UC1){
+                cvtColor(src, tmp, CV_GRAY2RGBA);
+            }else if(src.type() == CV_8UC3){
+                cvtColor(src, tmp, CV_BGR2RGBA);
+            }else if(src.type() == CV_8UC4){
+                if(needPremultiplyAlpha){
+                    cvtColor(src, tmp, CV_RGBA2mRGBA);
+                }else{
+                    src.copyTo(tmp);
+                }
+            }
+        }else{
+            // info.format == ANDROID_BITMAP_FORMAT_RGB_565
+            Mat tmp(info.height, info.width, CV_8UC2, pixels);
+            if(src.type() == CV_8UC1){
+                cvtColor(src, tmp, CV_GRAY2BGR565);
+            }else if(src.type() == CV_8UC3){
+                cvtColor(src, tmp, CV_BGR2BGR565);
+            }else if(src.type() == CV_8UC4){
+                cvtColor(src, tmp, CV_RGBA2BGR565);
+            }
+        }
+        AndroidBitmap_unlockPixels(env, bitmap);
+        return bitmap;
+    }catch(cv::Exception e){
+        AndroidBitmap_unlockPixels(env, bitmap);
+        jclass je = env->FindClass("org/opencv/core/CvException");
+        if(!je) je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, e.what());
+        return bitmap;
+    }catch (...){
+        AndroidBitmap_unlockPixels(env, bitmap);
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "Unknown exception in JNI code {nMatToBitmap}");
+        return bitmap;
+    }
+}
+
+
 extern "C" {
+
 
 JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_gray(
         JNIEnv *env, jclass obj, jintArray buf, int w, int h) {
@@ -215,6 +276,46 @@ JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_gray(
     return result;
 }
 
+
+JNIEXPORT jobject JNICALL Java_com_martin_opencv4android_OpenCVHelper_getGrayBitmap
+(JNIEnv *env, jobject thiz,jobject bitmap)
+{
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Scaning getGrayBitmap");
+    int ret;
+    AndroidBitmapInfo info;
+    void* pixels = 0;
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        __android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return NULL;
+    }
+
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888 )
+    {       __android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"Bitmap format is not RGBA_8888!");
+        return NULL;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        __android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+    Mat mbgra(info.height, info.width, CV_8UC4, pixels);
+    // init our output image
+    Mat dst = mbgra.clone();
+
+    cvtColor(mbgra, dst, CV_BGR2GRAY);
+
+    //get source bitmap's config
+    jclass java_bitmap_class = (jclass)env->FindClass("android/graphics/Bitmap");
+    jmethodID mid = env->GetMethodID(java_bitmap_class, "getConfig", "()Landroid/graphics/Bitmap$Config;");
+    jobject bitmap_config = env->CallObjectMethod(bitmap, mid);
+    jobject _bitmap = mat_to_bitmap(env,dst,false,bitmap_config);
+
+    AndroidBitmap_unlockPixels(env, bitmap);
+    return _bitmap;
+}
+
+
 JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_getBoxPoints(
         JNIEnv *env, jclass obj, jintArray buf, int w, int h) {
 
@@ -236,29 +337,26 @@ JNIEXPORT jintArray JNICALL Java_com_martin_opencv4android_OpenCVHelper_getBoxPo
              resizedWidth=RESIZE_WIDTH;
              resizedHgt = RESIZE_HEIGHT;
     }
-    /*
-    for(int p = 0; p < w; p++) {
-        for(int q = 0; q < h; q++){
-            // __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "%d", imgData.at<uchar>(p,q));
-        }
-    }*/
-    imgData = resize_(imgData);
-    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Checkpt 3");
+
+    // imgData = resize_(imgData);
+
     cvtColor(imgData , imgData , CV_RGBA2RGB);
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "SIZE %d %d",OrigHeight,OrigWidth);
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Checkpt 3xxx");
     vector<Point2f> points = getPoints(imgData);
+    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Checkpt 3");
     int point[8] = {0,0,0,0,0,0,0,0};
     int countr=0;
     	for(int i=0;i<points.size();i++)
     	{
-
+             __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " point  before x: %d", (int)points[i].x);
     	    point[countr] = (int)points[i].x*(float(OrigWidth)/resizedWidth);
-    	    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " point  before x: %d", point[countr]);
-    	    countr++;
+    	   countr++;
+    	    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " point  before y: %d", (int)points[i].y);
     	    point[countr] = (int)points[i].y*(float(OrigHeight)/resizedHgt);
-    	    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " point  before y: %d", point[countr]);
     	    countr++;
     	}
-    for(int i=0;i<8;i++)
+    for(int i=0;i<countr;i++)
         	{
         	    __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, " point %d", point[i]);
 

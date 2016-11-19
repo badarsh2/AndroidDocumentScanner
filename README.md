@@ -1,2 +1,2 @@
-# Document Scanner
-Document Scanner using OpenCV + Android NDK
+# OpenCV4Android
+OpenCV 在Android中的使用使用案例。

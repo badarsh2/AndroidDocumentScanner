@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:id="@+id/picture_icon_layout">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp">
+
+        <ImageView
+            android:id="@+id/pictureIV"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/counter" />
+
+        <View
+            android:id="@+id/pictureCountBgV"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/bg_circle"
+            android:layout_gravity="bottom|right"/>
+
+        <TextView
+            android:id="@+id/pictureCountTV"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="bottom|right"
+            android:gravity="center"
+            android:text=""
+            android:textColor="#ffff"
+            android:textSize="12sp" />
+
+    </FrameLayout>
+
+</LinearLayout>

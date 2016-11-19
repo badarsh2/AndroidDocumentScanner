@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.martin.opencv4android.DetailActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"/>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:id="@+id/camera_preview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_above="@+id/linearLayout" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/linearLayout">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:visibility="gone"
+                android:id="@+id/extra_settings"
+                android:background="@color/colorImage">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="true"
+                    android:id="@+id/flashon">
+                    <ImageView
+                        android:id="@+id/flash_on"
+                        android:layout_width="20dp"
+                        android:layout_margin="15dp"
+                        android:background="@drawable/flash"
+                        android:layout_height="23dp"
+                        >
+                    </ImageView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="true"
+                    android:id="@+id/flashoff">
+                    <ImageView
+                        android:id="@+id/flash_off"
+                        android:layout_width="20dp"
+                        android:layout_margin="15dp"
+                        android:background="@drawable/flash_off"
+                        android:layout_height="23dp"
+                        >
+                    </ImageView>
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/captureImg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:background="@color/colorPrimary"
+                android:orientation="vertical"
+                android:layout_alignParentBottom="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:id="@+id/textView"
+                    android:text="Single Mode"
+                    android:textSize="17dp"
+                    android:textColor="#FFFFFF"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/picturecount"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:onClick="true">
+                        <include layout="@layout/layout_picture_count"
+                            android:id="@+id/picture_count"
+                            />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/settingTest"
+                        android:gravity="center"
+                        android:onClick="true">
+                        <ImageView
+                            android:id="@+id/settingtest"
+                            android:layout_width="30dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_marginBottom="20dp"
+                            android:layout_marginLeft="0dp"
+                            android:layout_marginRight="22dp"
+                            android:layout_height="27dp"
+                            >
+                        </ImageView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/setting_bef"
+                        android:gravity="center"
+                        android:onClick="true">
+                        <ImageView
+                            android:id="@+id/settingbefore"
+                            android:layout_width="30dp"
+                            android:layout_marginLeft="17dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_marginBottom="20dp"
+                            android:layout_marginRight="20dp"
+                            android:background="@drawable/settings"
+                            android:layout_height="27dp"
+                            >
+                        </ImageView>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/setting_aft"
+                        android:visibility="gone"
+                        android:gravity="center"
+                        android:onClick="true">
+                        <ImageView
+                            android:id="@+id/settingafter"
+                            android:layout_width="30dp"
+                            android:layout_margin="20dp"
+                            android:background="@drawable/setting_after"
+                            android:layout_height="27dp"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/camera_single"
+                        android:gravity="center"
+                        android:onClick="true">
+                        <Button
+                            android:id="@+id/camerasingle"
+                            android:layout_width="50dp"
+                            android:layout_margin="20dp"
+                            android:background="@drawable/cameranew"
+                            android:layout_height="45dp"
+                            >
+                        </Button>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/camera_batch"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:onClick="true">
+                        <Button
+                            android:id="@+id/cameraBatch"
+                            android:layout_width="50dp"
+                            android:layout_margin="20dp"
+                            android:background="@drawable/camerabatch"
+                            android:layout_height="45dp"
+                            >
+                        </Button>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/batch_bef"
+                        android:gravity="center"
+                        android:onClick="true">
+                        <ImageView
+                            android:id="@+id/batch_mode_before"
+                            android:layout_width="30dp"
+                            android:layout_margin="20dp"
+                            android:background="@drawable/group"
+                            android:layout_height="27dp"
+                            >
+                        </ImageView>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/batch_aft"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:onClick="true">
+                        <ImageView
+                            android:id="@+id/batch_mode_after"
+                            android:layout_width="30dp"
+                            android:layout_margin="20dp"
+                            android:background="@drawable/batch_mode_after"
+                            android:layout_height="27dp"
+                            >
+                        </ImageView>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/single_bef"
+                        android:gravity="center"
+                        android:onClick="true">
+                        <ImageView
+                            android:id="@+id/single_mode"
+                            android:layout_width="30dp"
+                            android:layout_margin="20dp"
+                            android:background="@drawable/ungroup"
+                            android:layout_height="27dp">
+                        </ImageView>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/single_afr"
+                        android:visibility="gone"
+                        android:gravity="center"
+                        android:onClick="true">
+
+                        <ImageView
+                            android:id="@+id/single_mode_again"
+                            android:layout_width="30dp"
+                            android:layout_margin="20dp"
+                            android:background="@drawable/ungroup_after"
+                            android:layout_height="27dp">
+                        </ImageView>
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

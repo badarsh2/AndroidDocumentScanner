@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group android:checkableBehavior="single"
+        >
         <item
-            android:id="@+id/trash"
+            android:id="@+id/docs"
             android:title="My Docs"
             android:checked="true"
+            android:textColor="#FFFFFF"
             android:icon="@drawable/ic_docs"/>
         <item
             android:id="@+id/home"
             android:title="Capture from Camera"
-            android:icon="@drawable/ic_camera"/>
+            android:textColor="#FFFFFF"
+            android:icon="@drawable/cameranew"/>
         <item
             android:id="@+id/settings"
             android:title="Import from Gallery"
-            android:icon="@drawable/ic_gallery"/>
+            android:textColor="#FFFFFF"
+            android:icon="@drawable/folder_image"/>
+
         <item
             android:id="@+id/logout"
             android:title="Exit"
+            android:textColor="#FFFFFF"
             android:icon="@drawable/ic_submit"/>
     </group>
 </menu>

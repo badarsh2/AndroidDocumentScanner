@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="#000000"
+    tools:context="com.martin.opencv4android.HomeActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+    </android.support.design.widget.AppBarLayout>
+
+ <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="match_parent"
+ android:layout_height="match_parent">
+
+     <include layout="@layout/layout_color" />
+
+ <FrameLayout
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:layout_gravity="center"
+     android:layout_margin="@dimen/scanPadding">
+
+     <FrameLayout
+         android:id="@+id/sourceFrame"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:layout_gravity="center"
+         android:layout_marginTop="@dimen/scanPaddingTop"
+         android:layout_marginBottom="@dimen/scanPadding"
+         android:layout_marginLeft="@dimen/scanPadding"
+         android:layout_marginRight="@dimen/scanPadding">
+
+         <ImageView
+             android:id="@+id/img1"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+              />
+     </FrameLayout>
+
+     <com.martin.opencv4android.PolygonView
+         android:id="@+id/polygonView"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:layout_gravity="center"
+         android:visibility="gone">
+     </com.martin.opencv4android.PolygonView>
+
+ </FrameLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="bottom|end"
+        android:id="@+id/relativeoptions"
+        android:background="@color/colorPrimary"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/cancel"
+            android:layout_weight="1"
+            android:src="@drawable/ic_cancel"
+            android:padding="7dp"/>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/rotateleft"
+            android:layout_weight="1"
+            android:src="@drawable/ic_rotateleft"
+            android:padding="7dp"/>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/rotateright"
+            android:layout_weight="1"
+            android:src="@drawable/ic_rotateright"
+            android:padding="7dp"/>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/submit"
+            android:layout_weight="1"
+            android:src="@drawable/ic_submit"
+            android:padding="7dp"/>
+        </LinearLayout>
+    </RelativeLayout>
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:text="Processing..."
+    android:textColor="#FFFFFF"
+    android:textSize="20dp"
+    android:id="@+id/textView"
+    android:gravity="center_horizontal"
+    android:layout_above="@+id/relativeoptions"/>
+
+</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

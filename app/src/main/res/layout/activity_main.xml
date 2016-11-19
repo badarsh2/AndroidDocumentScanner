@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="#000000"
     tools:context="com.martin.opencv4android.HomeActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -14,15 +15,17 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" />
+    <!-- <include
+         android:id="@+id/color"
+         layout="@layout/layout_color"
+        />-->
 
-    <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/fab"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="bottom|end"-->
-        <!--android:layout_margin="@dimen/fab_margin"-->
-        <!--android:src="@drawable/ic_action_name" />-->
+    <include
+        layout="@layout/content_main"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -57,5 +60,10 @@
             android:src="@drawable/ic_submit"
             android:padding="7dp"/>
     </LinearLayout>
+
+    <include
+        android:id="@+id/grievanceProgressBar"
+        layout="@layout/loadingbar" />
+
 
 </android.support.design.widget.CoordinatorLayout>

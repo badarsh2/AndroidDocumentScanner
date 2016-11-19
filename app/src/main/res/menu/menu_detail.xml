@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_Select"
         android:orderInCategory="100"
-        android:title="Settings"
-        app:showAsAction="never" />
+        android:title="Delete All"
+        app:showAsAction="never"
+        android:icon="@drawable/settings"/>
+
 </menu>

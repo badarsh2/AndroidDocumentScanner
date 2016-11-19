@@ -18,6 +18,8 @@ LOCAL_MODULE := OpenCV
 
 LOCAL_SRC_FILES := com_martin_opencv4android_OpenCVHelper.cpp
 
-LOCAL_LDLIBS +=  -lm -llog
+LOCAL_SRC_FILES += extra_functions.cpp
+LOCAL_LDLIBS    += -lm -llog -landroid
+LOCAL_LDFLAGS += -ljnigraphics
 
 include $(BUILD_SHARED_LIBRARY)

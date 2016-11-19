@@ -4,6 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
+    android:background="#FFFFFF"
     android:padding="10dp" >
 
     <TextView
@@ -11,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Save image to:"
+        android:textColor="@color/colorAccent"
         android:textSize="16sp"
         android:textStyle="bold"/>
 
@@ -18,8 +20,12 @@
         android:id="@+id/userInput"
         android:layout_width="match_parent"
         android:inputType="text"
-        android:text="New Doc 1"
+        android:hint="Enter Doc Name"
+        android:textColor="#000000"
+        android:text="NewDoc1"
         android:lines="3"
+        android:textColorHint="@color/colorPrimary"
+        android:textSize="13dp"
         android:layout_height="wrap_content" >
 
         <requestFocus />

@@ -1,19 +1,13 @@
 package com.martin.opencv4android;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -23,22 +17,23 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
+
+
+import com.martin.opencv4android.Adapter.DocsAdapter;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 
 
 public class HomeActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private RecyclerView rvDocs;
-    private Uri fileUri;
+    private Uri fileUri,selectedImage;
     ArrayList<DocItem> iPostParams;
     private DocsAdapter adapter;
     private NavigationView navigationView;
@@ -74,23 +69,30 @@ public class HomeActivity extends AppCompatActivity {
 
         public void walk(File root) {
             iPostParams = new ArrayList<>();
-            DocItem postemail;
-            // iPostParams.add(postemail);
+            DocItem postemail = new DocItem("Dummy Doc", "12/09/16", null);
+            iPostParams.add(postemail);
+
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
+            String formattedDate = df.format(c.getTime());
+            System.out.println("Current time => " + formattedDate);
 
             File[] list = root.listFiles();
             if(list != null) {
                 for (File f : list) {
                     if (f.isDirectory() && !(f.getName().equals("thumbnails"))) {
                         Log.d("", "Dir: " + f.getAbsoluteFile());
-                        postemail = null;
+                        postemail= null;
                         Bitmap b = null;
                         File file= new File(android.os.Environment.getExternalStorageDirectory(),"/DocumentScanner/thumbnails/" + f.getName() + ".jpg");
                         try {
                             b = BitmapFactory.decodeStream(new FileInputStream(file));
+                            System.out.println("File name" + file);
+                            System.out.println("bitmap"+b);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
-                        postemail = new DocItem(f.getName().toString(), "19/09/16", b);
+                        postemail = new DocItem(f.getName().toString(), formattedDate, b);
                         iPostParams.add(postemail);
                         // walk(f);
                     } else {
@@ -138,23 +140,14 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void openCamera() {
-        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = createImageFile();
-        file.getParentFile().mkdirs();
-        fileUri = Uri.fromFile(file);
-        if (file != null) {
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-            startActivityForResult(cameraIntent, ScanConstants.START_CAMERA_REQUEST_CODE);
-        }
+
+
+        Intent in =new Intent(HomeActivity.this,CameraScreen.class);
+        startActivity(in);
+
     }
 
-    private File createImageFile() {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new
-                Date());
-        File file = new File(ScanConstants.IMAGE_PATH, "IMG_" + timeStamp +
-                ".jpg");
-        return file;
-    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -163,12 +156,13 @@ public class HomeActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             try {
                 switch (requestCode) {
-                    case ScanConstants.START_CAMERA_REQUEST_CODE:
-                        bitmap = getBitmap(fileUri);
-                        break;
 
                     case ScanConstants.PICKFILE_REQUEST_CODE:
-                        bitmap = getBitmap(data.getData());
+                        selectedImage = data.getData();
+                        Intent i = new Intent(HomeActivity.this, PolygonViewScreen.class);
+                        i.putExtra("imageTest1", selectedImage);//here we have to pass uri for crystal clear photo ,if this is gallery so pass data.getData()
+                        Log.i("test null",selectedImage.toString());
+                        startActivity(i);
                         break;
                 }
             } catch (Exception e
@@ -176,39 +170,9 @@ public class HomeActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        if (bitmap != null) {
-            postImagePick(bitmap);
-        }
+
     }
 
-    protected void postImagePick(Bitmap bitmap) {
-        Uri uri = Utils.getUri(HomeActivity.this, bitmap);
-        bitmap.recycle();
-        // scanner.onBitmapSelect(uri);
-        Intent i = new Intent(HomeActivity.this, MainActivity.class);
-        i.putExtra("imageUri", uri);
-        startActivity(i);
-    }
-
-    private Bitmap getBitmap(Uri selectedimg) throws IOException {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 3;
-        AssetFileDescriptor fileDescriptor = null;
-        fileDescriptor = getContentResolver().openAssetFileDescriptor(selectedimg, "r");
-        Bitmap original
-                = BitmapFactory.decodeFileDescriptor(
-                fileDescriptor.getFileDescriptor(), null, options);
-        return original;
-    }
-
-//    private class GalleryClickListener implements View.OnClickListener {
-//        @Override
-//        public void onClick(View view) {
-//            Intent i = new Intent(HomeActivity.this, MainActivity.class);
-//            i.putExtra("PASSING", 2);
-//            startActivity(i);
-//        }
-//    }
 
     public void initNavigationDrawer() {
 
@@ -221,18 +185,18 @@ public class HomeActivity extends AppCompatActivity {
 
                 switch (id){
                     case R.id.home:
-                        openCamera();
+                        openCamera();//this will open the camera (Activity screen)
                         drawerLayout.closeDrawers();
                         break;
                     case R.id.settings:
-                        openMediaContent();
+                        openMediaContent();//this will open the gallery
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.trash:
-                        // Toast.makeText(getApplicationContext(),"Trash",Toast.LENGTH_SHORT).show();
+                    case R.id.docs:
                         drawerLayout.closeDrawers();
                         break;
-                    case R.id.logout:
+
+                    case R.id.logout://exit the app
                         finish();
 
                 }
