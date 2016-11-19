@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Document Scanner</string>
+    <string name="title_activity_scan">ScanActivity</string>
+    <string name="title_activity_home">Document Scanner</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+    <string name="title_activity_detail">DetailActivity</string>
+    <string name="title_activity_image">Image</string>
+</resources>
